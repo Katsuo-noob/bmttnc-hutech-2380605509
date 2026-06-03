@@ -1,80 +1,190 @@
+import re
+
+
 class PlayFairCipher:
-    def __init__(self) -> None:
+
+    def __init__(self):
         pass
 
+    # ==========================
+    # TẠO MA TRẬN PLAYFAIR
+    # ==========================
     def create_playfair_matrix(self, key):
-        key = key.upper().replace("J", "I")  # Chuyển J thành I trong khóa
-        key_set = set(key)
+
+        # Ràng buộc key
+        if not key or not key.strip():
+            raise ValueError(
+                "Key không được để trống"
+            )
+
+        if not re.fullmatch(r"[A-Za-z]+", key):
+            raise ValueError(
+                "Key chỉ được chứa chữ cái A-Z"
+            )
+
+        key = key.upper().replace("J", "I")
+
+        # Loại bỏ ký tự trùng
+        unique_key = ""
+
+        for ch in key:
+            if ch not in unique_key:
+                unique_key += ch
+
         alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
-        remaining_letters = [letter for letter in alphabet if letter not in key_set]
-        matrix = list(key)
 
-        for letter in remaining_letters:
-            matrix.append(letter)
-            if len(matrix) == 25:
-                break
+        matrix_data = list(unique_key)
 
-        playfair_matrix = [matrix[i:i+5] for i in range(0, len(matrix), 5)]
-        return playfair_matrix
+        for ch in alphabet:
+            if ch not in matrix_data:
+                matrix_data.append(ch)
 
+        return [
+            matrix_data[i:i + 5]
+            for i in range(0, 25, 5)
+        ]
+
+    # ==========================
+    # TÌM TỌA ĐỘ KÝ TỰ
+    # ==========================
     def find_letter_coords(self, matrix, letter):
-        for row in range(len(matrix)):
-            for col in range(len(matrix[row])):
+
+        for row in range(5):
+            for col in range(5):
                 if matrix[row][col] == letter:
                     return row, col
 
-    def playfair_encrypt(self, plain_text, matrix):
-        plain_text = plain_text.replace("J", "I").upper()
-        encrypted_text = ""
+        raise ValueError(
+            f"Không tìm thấy ký tự {letter}"
+        )
 
-        for i in range(0, len(plain_text), 2):
-            pair = plain_text[i:i+2]
+    # ==========================
+    # CHUẨN HÓA PLAINTEXT
+    # ==========================
+    def prepare_plaintext(self, text):
 
-            if len(pair) == 1:  # Nếu lẻ, thêm 'X'
-                pair += "X"
+        text = re.sub(r'[^A-Z]', '', text.upper())
+        text = text.replace('J', 'I')
 
-            row1, col1 = self.find_letter_coords(matrix, pair[0])
-            row2, col2 = self.find_letter_coords(matrix, pair[1])
+        result = ""
+        i = 0
 
-            if row1 == row2:  # Cùng hàng
-                encrypted_text += matrix[row1][(col1 + 1) % 5] + matrix[row2][(col2 + 1) % 5]
-            elif col1 == col2:  # Cùng cột
-                encrypted_text += matrix[(row1 + 1) % 5][col1] + matrix[(row2 + 1) % 5][col2]
-            else:  # Tạo hình chữ nhật
-                encrypted_text += matrix[row1][col2] + matrix[row2][col1]
+        while i < len(text):
 
-        return encrypted_text
+            first = text[i]
 
-    def playfair_decrypt(self, cipher_text, matrix):
-        cipher_text = cipher_text.upper()
-        decrypted_text = ""
+            if i + 1 < len(text):
 
-        for i in range(0, len(cipher_text), 2):
-            pair = cipher_text[i:i+2]
+                second = text[i + 1]
 
-            row1, col1 = self.find_letter_coords(matrix, pair[0])
-            row2, col2 = self.find_letter_coords(matrix, pair[1])
+                # Nếu 2 ký tự giống nhau
+                if first == second:
+                    result += first + "X"
+                    i += 1
+                else:
+                    result += first + second
+                    i += 2
 
-            if row1 == row2:  # Cùng hàng
-                decrypted_text += matrix[row1][(col1 - 1) % 5] + matrix[row2][(col2 - 1) % 5]
-            elif col1 == col2:  # Cùng cột
-                decrypted_text += matrix[(row1 - 1) % 5][col1] + matrix[(row2 - 1) % 5][col2]
-            else:  # Tạo hình chữ nhật
-                decrypted_text += matrix[row1][col2] + matrix[row2][col1]
-
-        # Loại bỏ ký tự 'X' nếu được thêm vào
-        banro = ""
-        for i in range(0, len(decrypted_text) - 2, 2):
-            if decrypted_text[i] == decrypted_text[i+2]:
-                banro += decrypted_text[i]
             else:
-                banro += decrypted_text[i] + decrypted_text[i+1]
+                result += first
+                i += 1
 
-        if decrypted_text[-1] == "X":
-            banro += decrypted_text[-2]
-        else:
-            banro += decrypted_text[-2]
-            banro += decrypted_text[-1]
+        # Nếu lẻ thì thêm X
+        if len(result) % 2 != 0:
+            result += "X"
 
-
-        return banro
+        return result
+    # ==========================
+    # MÃ HÓA
+    # ==========================
+    def playfair_encrypt(self, plain_text, matrix):
+        # Ràng buộc plaintext
+        if not plain_text or not plain_text.strip():
+            raise ValueError(
+                "Plain text không được để trống"
+            )
+        plain_text = self.prepare_plaintext(
+            plain_text
+        )
+        if len(plain_text) == 0:
+            raise ValueError(
+                "Plain text không hợp lệ"
+            )
+        encrypted_text = ""
+        for i in range(0, len(plain_text), 2):
+            a = plain_text[i]
+            b = plain_text[i + 1]
+            row1, col1 = self.find_letter_coords(
+                matrix, a
+            )
+            row2, col2 = self.find_letter_coords(
+                matrix, b
+            )
+            # Cùng hàng
+            if row1 == row2:
+                encrypted_text += (
+                    matrix[row1][(col1 + 1) % 5]
+                    + matrix[row2][(col2 + 1) % 5]
+                )
+            # Cùng cột
+            elif col1 == col2:
+               encrypted_text += (
+                    matrix[(row1 + 1) % 5][col1]
+                    + matrix[(row2 + 1) % 5][col2]
+                )
+            # Hình chữ nhật
+            else:
+                encrypted_text += (
+                    matrix[row1][col2]
+                    + matrix[row2][col1]
+                )
+        return encrypted_text
+    # ==========================
+    # GIẢI MÃ
+    # ==========================
+    def playfair_decrypt(self, cipher_text, matrix):
+        # Ràng buộc ciphertext
+        if not cipher_text or not cipher_text.strip():
+            raise ValueError(
+                "Cipher text không được để trống"
+            )
+        cipher_text = re.sub(r'[^A-Z]','',cipher_text.upper())
+        if len(cipher_text) == 0:
+            raise ValueError(
+                "Cipher text không hợp lệ"
+            )
+        if len(cipher_text) % 2 != 0:
+            raise ValueError(
+                "Cipher text phải có số ký tự chẵn"
+            )
+        decrypted_text = ""
+        for i in range(0, len(cipher_text), 2):
+            a = cipher_text[i]
+            b = cipher_text[i + 1]
+            row1, col1 = self.find_letter_coords(
+                matrix, a
+            )
+            row2, col2 = self.find_letter_coords(
+                matrix, b
+            )
+            # Cùng hàng
+            if row1 == row2:
+                decrypted_text += (
+                    matrix[row1][(col1 - 1) % 5]
+                    + matrix[row2][(col2 - 1) % 5]
+                )
+            # Cùng cột
+            elif col1 == col2:
+                decrypted_text += (
+                    matrix[(row1 - 1) % 5][col1]
+                    + matrix[(row2 - 1) % 5][col2]
+                )
+            # Hình chữ nhật
+            else:
+                decrypted_text += (
+                    matrix[row1][col2]
+                    + matrix[row2][col1]
+                )               
+            if decrypted_text.endswith("X"):
+                decrypted_text = decrypted_text[:-1]
+        return decrypted_text

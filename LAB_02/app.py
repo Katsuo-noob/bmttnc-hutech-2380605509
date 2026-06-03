@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from cipher.caesar import CaesarCipher
 from cipher.vigenere import VigenereCipher
 from cipher.playfair import PlayFairCipher
@@ -18,20 +18,40 @@ def caesar():
 
 @app.route("/caesar/encrypt", methods=['POST'])
 def caesar_encrypt():
-    text = request.form['inputPlainText']
-    key = int(request.form['inputKeyPlain'])
-    caesar = CaesarCipher()
-    encrypted_text = caesar.encrypt_text(text, key)
-    return f"text: {text}<br>/key: {key}<br>/encrypted text: {encrypted_text}"
+    try:
+        text = request.form['inputPlainText']
+        key = request.form['inputKeyPlain']
+        caesar = CaesarCipher()
+        encrypted_text = caesar.encrypt_text(
+            text,
+            key
+        )
+        return f"""
+        text: {text}<br>
+        key: {key}<br>
+        encrypted text: {encrypted_text}
+        """
+    except ValueError as e:
+        return f"""
+        <h3 style='color:red'>
+            {e}
+        </h3>
+        """
 
 @app.route("/caesar/decrypt", methods=['POST'])
 def caesar_decrypt():
-    text = request.form['inputCipherText']
-    key = int(request.form['inputKeyCipher'])
-    caesar = CaesarCipher()
-    decrypted_text = caesar.decrypt_text(text, key)
-    return f"text: {text}<br>/key: {key}<br>/decrypted text: {decrypted_text}"
-
+    try:
+        text = request.form['inputCipherText']
+        key = request.form['inputKeyCipher']
+        caesar = CaesarCipher()
+        decrypted_text = caesar.decrypt_text(text, key)
+        return f"text: {text}<br>/key: {key}<br>/decrypted text: {decrypted_text}"
+    except ValueError as e:
+        return f"""
+        <h3 style='color:red'>
+            {e}
+        </h3>
+        """
 
 # --------------------- ROUTES VIGENERE ---------------------
 @app.route("/vigenere")
@@ -40,19 +60,33 @@ def vigenere():
 
 @app.route("/vigenere/encrypt", methods=['POST'])
 def vigenere_encrypt():
-    text = request.form['inputPlainText']
-    key = request.form['inputKeyPlain']
-    vigenere = VigenereCipher()
-    encrypted_text = vigenere.encrypt_text(text, key)
-    return f"text: {text}<br>/key: {key}<br>/encrypted text: {encrypted_text}"
+    try:
+        text = request.form['inputPlainText']
+        key = request.form['inputKeyPlain']
+        vigenere = VigenereCipher()
+        encrypted_text = vigenere.encrypt_text(text, key)
+        return f"text: {text}<br>/key: {key}<br>/encrypted text: {encrypted_text}"
+    except ValueError as e:
+        return f"""
+        <h3 style='color:red'>
+            {e}
+        </h3>
+        """
 
 @app.route("/vigenere/decrypt", methods=['POST'])
 def vigenere_decrypt():
-    text = request.form['inputCipherText']
-    key = request.form['inputKeyCipher']
-    vigenere = VigenereCipher()
-    decrypted_text = vigenere.decrypt_text(text, key)
-    return f"text: {text}<br>/key: {key}<br>/decrypted text: {decrypted_text}"
+    try:
+        text = request.form['inputCipherText']
+        key = request.form['inputKeyCipher']
+        vigenere = VigenereCipher()
+        decrypted_text = vigenere.decrypt_text(text, key)
+        return f"text: {text}<br>/key: {key}<br>/decrypted text: {decrypted_text}"
+    except ValueError as e:
+        return f"""
+        <h3 style='color:red'>
+            {e}
+        </h3>
+        """
 
 
 # --------------------- ROUTES PLAYFAIR ---------------------
@@ -69,21 +103,52 @@ def playfair_creatematrix():
 
 @app.route("/playfair/encrypt", methods=['POST'])
 def playfair_encrypt():
-    text = request.form['inputPlainText']
-    key = request.form['inputKeyPlain']
-    playfair_cipher = PlayFairCipher()
-    playfair_matrix = playfair_cipher.create_playfair_matrix(key)
-    encrypted_text = playfair_cipher.playfair_encrypt(text, playfair_matrix)
-    return f"text: {text}<br>/key: {key}<br>/encrypted text: {encrypted_text}"
 
+    try:
+        text = request.form['inputPlainText']
+        key = request.form['inputKeyPlain']
+
+        playfair_cipher = PlayFairCipher()
+
+        playfair_matrix = playfair_cipher.create_playfair_matrix(key)
+
+        encrypted_text = playfair_cipher.playfair_encrypt(
+            text,
+            playfair_matrix
+        )
+
+        return f"""
+        text: {text}<br>
+        key: {key}<br>
+        encrypted text: {encrypted_text}
+        """
+
+    except Exception as e:
+        return f"Lỗi: {str(e)}"
 @app.route("/playfair/decrypt", methods=['POST'])
 def playfair_decrypt():
-    text = request.form['inputCipherText']
-    key = request.form['inputKeyCipher']
-    playfair_cipher = PlayFairCipher()
-    playfair_matrix = playfair_cipher.create_playfair_matrix(key)
-    decrypted_text = playfair_cipher.playfair_decrypt(text, playfair_matrix)
-    return f"text: {text}<br>/key: {key}<br>/decrypted text: {decrypted_text}"
+
+    try:
+        text = request.form['inputCipherText']
+        key = request.form['inputKeyCipher']
+
+        playfair_cipher = PlayFairCipher()
+
+        playfair_matrix = playfair_cipher.create_playfair_matrix(key)
+
+        decrypted_text = playfair_cipher.playfair_decrypt(
+            text,
+            playfair_matrix
+        )
+
+        return f"""
+        text: {text}<br>
+        key: {key}<br>
+        decrypted text: {decrypted_text}
+        """
+
+    except Exception as e:
+        return f"Lỗi: {str(e)}"
 
 
 # --------------------- ROUTES RAILFENCE ---------------------
@@ -93,16 +158,35 @@ def railfence():
 
 @app.route("/railfence/encrypt", methods=['POST'])
 def railfence_encrypt():
-    text = request.form['inputPlainText']
-    key = int(request.form['inputKeyPlain'])
-    railfence = RailFenceCipher()
-    encrypted_text = railfence.rail_fence_encrypt(text, key)
-    return f"text: {text}<br>/key: {key}<br>/encrypted text: {encrypted_text}"
+
+    try:
+
+        text = request.form['inputPlainText']
+        key = int(request.form['inputKeyPlain'])
+
+        railfence = RailFenceCipher()
+
+        encrypted = railfence.rail_fence_encrypt(
+            text,
+            key
+        )
+
+        return f"""
+        text: {text}<br>
+        key: {key}<br>
+        encrypted text: {encrypted}
+        """
+
+    except Exception as e:
+        return f"Chi dc nhap so nguyen "
 
 @app.route("/railfence/decrypt", methods=['POST'])
 def railfence_decrypt():
-    text = request.form['inputCipherText']
-    key = int(request.form['inputKeyCipher'])
+    try:
+        text = request.form['inputCipherText']
+        key = int(request.form['inputKeyCipher'])
+    except (KeyError, ValueError):
+        return f" Chi dc nhap so nguyen"
     railfence = RailFenceCipher()
     decrypted_text = railfence.rail_fence_decrypt(text, key)
     return f"text: {text}<br>/key: {key}<br>/decrypted text: {decrypted_text}"

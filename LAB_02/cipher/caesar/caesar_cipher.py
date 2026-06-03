@@ -6,6 +6,12 @@ class CaesarCipher:
         self.alphabet_len = len(self.alphabet)
 
     def encrypt_text(self, text: str, key: int) -> str:
+        if not str(key).strip().lstrip('-').isdigit():
+            raise ValueError(
+                "Khóa phải là số nguyên"
+            )
+
+        key = int(key)
         encrypted_text = []
         try:
             key = int(key)  # Đảm bảo key là số nguyên
@@ -18,10 +24,16 @@ class CaesarCipher:
                 else:
                     encrypted_text.append(letter)  # Giữ nguyên dấu câu và khoảng trắng
         except ValueError as e:
-            return f"Lỗi: {e}"
+            return f"Lỗi: nhập khóa không hợp lệ. Vui lòng nhập một số nguyên. Chi tiết lỗi: {e}"
         return "".join(encrypted_text)
 
     def decrypt_text(self, text: str, key: int) -> str:
+        if not str(key).strip().lstrip('-').isdigit():
+            raise ValueError(
+                "Khóa phải là số nguyên"
+            )
+
+        key = int(key)
         decrypted_text = []
         try:
             key = int(key)  # Đảm bảo key là số nguyên
@@ -34,5 +46,5 @@ class CaesarCipher:
                 else:
                     decrypted_text.append(letter)
         except ValueError as e:
-            return f"Lỗi: {e}"
+            return f"Lỗi: nhập khóa không hợp lệ. Vui lòng nhập một số nguyên. Chi tiết lỗi: {e}"
         return "".join(decrypted_text)

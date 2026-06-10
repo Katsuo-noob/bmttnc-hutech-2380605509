@@ -1,7 +1,7 @@
 import sys
+import requests
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from ui.caesar import Ui_MainWindow
-import requests
 
 
 class MyApp(QMainWindow):
@@ -12,15 +12,15 @@ class MyApp(QMainWindow):
         self.ui.setupUi(self)
 
         # Connect buttons
-        self.ui.pushButton.clicked.connect(self.call_api_encrypt)
-        self.ui.pushButton_2.clicked.connect(self.call_api_decrypt)
+        self.ui.btn_encrypt.clicked.connect(self.call_api_encrypt)
+        self.ui.btn_decrypt.clicked.connect(self.call_api_decrypt)
 
     def call_api_encrypt(self):
         url = "http://127.0.0.1:5000/api/caesar/encrypt"
 
         payload = {
-            "plain_text": self.ui.plainTextEdit.toPlainText(),
-            "key": self.ui.plainTextEdit_2.toPlainText()
+            "plain_text": self.ui.plainText_txt.toPlainText(),
+            "key": self.ui.Key_txt.toPlainText()
         }
 
         try:
@@ -32,7 +32,7 @@ class MyApp(QMainWindow):
             if response.status_code == 200:
                 data = response.json()
 
-                self.ui.plainTextEdit_3.setPlainText(
+                self.ui.cipherText_txt.setPlainText(
                     data.get("encrypted_text", "")
                 )
 
@@ -59,8 +59,8 @@ class MyApp(QMainWindow):
         url = "http://127.0.0.1:5000/api/caesar/decrypt"
 
         payload = {
-            "cipher_text": self.ui.plainTextEdit_3.toPlainText(),
-            "key": self.ui.plainTextEdit_2.toPlainText()
+            "cipher_text": self.ui.cipherText_txt.toPlainText(),
+            "key": self.ui.Key_txt.toPlainText()
         }
 
         try:
@@ -72,7 +72,7 @@ class MyApp(QMainWindow):
             if response.status_code == 200:
                 data = response.json()
 
-                self.ui.plainTextEdit.setPlainText(
+                self.ui.plainText_txt.setPlainText(
                     data.get("decrypted_text", "")
                 )
 

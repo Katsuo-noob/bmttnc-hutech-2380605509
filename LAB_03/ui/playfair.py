@@ -44,6 +44,15 @@ class Ui_MainWindow(object):
         self.btn_decrypt = QtWidgets.QPushButton(self.centralwidget)
         self.btn_decrypt.setGeometry(QtCore.QRect(450, 270, 75, 23))
         self.btn_decrypt.setObjectName("btn_decrypt")
+        # Thêm label hiển thị tên
+        self.label_name = QtWidgets.QLabel(self.centralwidget)
+        self.label_name.setGeometry(QtCore.QRect(20, 310, 250, 20))
+        self.label_name.setObjectName("label_name")
+
+        # Thêm label hiển thị MSSV/ĐCKH
+        self.label_mssv = QtWidgets.QLabel(self.centralwidget)
+        self.label_mssv.setGeometry(QtCore.QRect(20, 330, 250, 20))
+        self.label_mssv.setObjectName("label_mssv")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 668, 21))
@@ -65,3 +74,6 @@ class Ui_MainWindow(object):
         self.label_4.setText(_translate("MainWindow", "Ciphertext:"))
         self.btn_encrypt.setText(_translate("MainWindow", "encrypt"))
         self.btn_decrypt.setText(_translate("MainWindow", "decrypt"))
+
+        self.label_name.setText(_translate("MainWindow", "Tên: Nguyễn Nguyên Thắng"))
+        self.label_mssv.setText(_translate("MainWindow", "MSSV: 2380605509"))

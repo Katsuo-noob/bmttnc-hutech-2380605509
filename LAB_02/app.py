@@ -178,7 +178,7 @@ def railfence_encrypt():
         """
 
     except Exception as e:
-        return f"Chi dc nhap so nguyen "
+        return f"Loi roi nhap lai di: {str(e)}"
 
 @app.route("/railfence/decrypt", methods=['POST'])
 def railfence_decrypt():
